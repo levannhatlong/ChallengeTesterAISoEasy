@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:15
+    container_name: world_db_container
+    restart: always  # Tự động khởi động lại nếu máy tính restart hoặc container lỗi
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: world_data_db  # Đảm bảo tên này khớp với DBeaver bạn đã tạo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Lưu dữ liệu vào ổ cứng máy thật
+
+volumes:
+  postgres_data: # Khai báo volume để không bị mất database khi xóa container

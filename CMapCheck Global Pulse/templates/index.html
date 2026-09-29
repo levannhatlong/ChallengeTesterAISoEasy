@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLOBAL PULSE | AI Monitoring</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <span><strong>GLOBAL</strong> PULSE</span>
+        </div>
+        <div class="map-controls">
+            <button id="btn-satellite" class="active">Vệ tinh</button>
+            <button id="btn-risk">Chế độ rủi ro</button>
+        </div>
+    </header>
+
+    <main class="app-container" id="app-wrapper">
+        <div id="map"></div>
+
+        <!-- Risk Legend -->
+        <div id="risk-legend" class="hidden">
+            <div class="legend-items">
+                <div class="legend-item"><span class="legend-dot" style="background:#dc2626"></span>Nguy hiểm cao (80-100)</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#ea580c"></span>Nguy hiểm (65-79)</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Cảnh báo cao (50-64)</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#eab308"></span>Cảnh báo (35-49)</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#84cc16"></span>Ổn định vừa (20-34)</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#22c55e"></span>Ổn định (0-19)</div>
+                <div class="legend-item"><span class="legend-dot" style="background:#334155"></span>Không có dữ liệu</div>
+            </div>
+        </div>
+
+        <div id="focus-container" class="hidden">
+            <div id="focus-map"></div>
+        </div>
+
+        <!-- Fixed AI Assistant Button -->
+        <button class="ai-assistant-btn" id="btn-open-chat">
+            <i class="fa-solid fa-comment-dots"></i>
+        </button>
+
+        <!-- Fixed Creation Button -->
+        <button class="creation-btn" id="btn-open-creation">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </button>
+
+        <!-- Independent Chat Panel -->
+        <div class="chat-panel" id="chat-panel">
+            <div class="chat-panel-header">
+                <h3><i class="fa-solid fa-robot"></i> Trợ lý AI</h3>
+                <button class="close-chat-panel" id="btn-close-chat-panel">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="chat-panel-content">
+                <div class="chat-messages" id="chat-messages"></div>
+                
+                <div class="quick-suggestions" id="quick-suggestions">
+                    <button class="suggestion-chip">Rủi ro tại Hà Nội?</button>
+                    <button class="suggestion-chip">Xem dự báo?</button>
+                    <button class="suggestion-chip">Mật độ giao thông?</button>
+                </div>
+
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Nhập câu hỏi tại đây...">
+                    <button id="btn-voice-input" class="btn-icon-small"><i class="fa-solid fa-microphone"></i></button>
+                    <button id="btn-send-chat" class="btn-icon-small accent"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Creation Modal Backdrop -->
+        <div class="creation-backdrop" id="creation-backdrop"></div>
+
+        <!-- Independent Creation Modal -->
+        <div class="creation-modal" id="creation-modal">
+            <div class="creation-modal-header">
+                <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Tạo nội dung</h3>
+                <button class="close-creation-modal" id="btn-close-creation">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="creation-modal-content">
+                <div class="creation-grid">
+                    <!-- Tạo ảnh -->
+                    <div class="creation-card">
+                        <div class="card-icon"><i class="fa-solid fa-image"></i></div>
+                        <h4>Tạo ảnh</h4>
+                        <p>Chi tiết prompt</p>
+                        <textarea id="img-prompt" placeholder="Ảnh về tình đồ phân giải cấp, tập trung vào mục nước vẫn biên miền Trung"></textarea>
+                        
+                        <label>Độ phân giải</label>
+                        <select id="img-resolution">
+                            <option>1024x1024</option>
+                            <option>1920x1080</option>
+                            <option>4K UHD</option>
+                        </select>
+
+                        <label>Phong cách</label>
+                        <select id="img-style">
+                            <option>Thực tế</option>
+                            <option>Nghệ thuật</option>
+                            <option>Phim ảnh</option>
+                        </select>
+
+                        <label>Góc nhìn</label>
+                        <select id="img-angle">
+                            <option>Trên cao 45 độ</option>
+                            <option>Góc rộng</option>
+                            <option>Cận cảnh</option>
+                        </select>
+
+                        <button class="btn-create"><i class="fa-solid fa-camera"></i> Bắt đầu tạo ảnh</button>
+                    </div>
+
+                    <!-- Tạo báo cáo -->
+                    <div class="creation-card">
+                        <div class="card-icon"><i class="fa-solid fa-file-pdf"></i></div>
+                        <h4>Tạo báo cáo</h4>
+
+                        <label>Định dạng</label>
+                        <select id="report-format">
+                            <option>PDF báo cáo đầy đủ</option>
+                            <option>Excel dữ liệu</option>
+                            <option>PowerPoint</option>
+                        </select>
+
+                        <label>Nội dung yêu cầu</label>
+                        <textarea id="report-prompt" placeholder="Ví dụ: Phân tích tình hình kinh tế và rủi ro chính trị tại Việt Nam trong 30 ngày gần đây, tập trung vào các vấn đề thương mại và đầu tư nước ngoài..."></textarea>
+
+                        <label>Ngôn ngữ</label>
+                        <select id="report-lang">
+                            <option>Tiếng Việt</option>
+                            <option>English</option>
+                            <option>中文</option>
+                        </select>
+
+                        <button class="btn-create"><i class="fa-solid fa-file-arrow-down"></i> Bắt đầu tạo báo cáo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="sidebar" id="sidebar">
+
+            <div id="country-default-view">
+                <div class="sidebar-header">
+                    <h2 id="country-name">Chọn một quốc gia</h2>
+                    <button class="close-sidebar" id="btn-close-sidebar">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Time Filter + News Section -->
+                <div class="news-section">
+                    <div class="time-filter-buttons" id="time-filter-buttons">
+                        <!-- Buttons will be generated dynamically by JavaScript -->
+                    </div>
+                    <div class="news-header">
+                        <h3><i class="fa-solid fa-newspaper"></i> Tin tức nổi bật cả nước</h3>
+                        <div class="news-search-container">
+                            <input type="text" id="news-search-input" placeholder="Tìm bài báo...">
+                            <i class="fa-solid fa-search"></i>
+                        </div>
+                    </div>
+                    <div id="news-articles" class="news-articles">
+                        <p class="no-data">Chọn quốc gia để xem tin tức</p>
+                    </div>
+                </div>
+
+                <!-- Keywords Section -->
+                <div class="keywords-section">
+                    <h3><i class="fa-solid fa-font"></i> Từ khóa nổi bật</h3>
+                    <div id="keywords-container" class="keywords-container">
+                        <p class="no-data">Chưa có dữ liệu từ khóa</p>
+                    </div>
+                </div>
+
+                <!-- City Summary Section -->
+                <div class="city-summary-section">
+                    <h3><i class="fa-solid fa-city"></i> Tóm tắt tình hình</h3>
+                    <div id="city-summary" class="city-summary">
+                        <p class="no-data">Chọn quốc gia để xem tóm tắt</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/chat.js"></script>
+</body>
+</html>
