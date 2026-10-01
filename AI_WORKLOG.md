@@ -1,15 +1,16 @@
 # AI_WORKLOG.md
 
-Tài liệu này ghi chép lại toàn bộ quá trình sử dụng các công cụ trí tuệ nhân tạo (Gemini và ChatGPT) để hỗ trợ phân tích, xây dựng chiến lược kiểm thử, gợi ý và đánh giá danh sách kịch bản kiểm thử (Test Cases) cho dự án **CMapCheck Global Pulse**.
+Tài liệu này ghi chép lại toàn bộ quá trình sử dụng các công cụ trí tuệ nhân tạo (Antigravity, Gemini và ChatGPT) để hỗ trợ phân tích, xây dựng chiến lược kiểm thử, gợi ý và đánh giá danh sách kịch bản kiểm thử (Test Cases) cho dự án **CMapCheck Global Pulse**.
 
 ## 1. Công cụ AI đã sử dụng
-* **Google Gemini (Mô hình chính):** Dùng để gợi ý chi tiết 15 tình huống kiểm thử (Test Cases) bám sát các tính năng thực tế của hệ thống như bản đồ, chatbot, tạo ảnh và xuất báo cáo.
+* **Antigravity (Mô hình khởi đầu):** Dùng để mô tả hệ thống cách chuẩn xác nhất dựa trên Project.
+* **Google Gemini (Mô hình chính):** Dùng để đánh giá mô tả hệ thống, gợi ý chi tiết 15 tình huống kiểm thử (Test Cases) bám sát các tính năng thực tế của hệ thống như bản đồ, chatbot, tạo ảnh và xuất báo cáo.
 * **ChatGPT (Mô hình đánh giá):** Dùng để rà soát, góp ý và đánh giá chất lượng của các tình huống kiểm thử do Gemini gợi ý nhằm đảm bảo độ chính xác và phù hợp.
 
 ## 2. Cách thức AI hỗ trợ trong quá trình kiểm thử
-* **Giai đoạn phân tích hệ thống:** Sử dụng Gemini để định hướng các bước kiểm thử bám sát vào giao diện và các tính năng chính của trang web.
+* **Giai đoạn phân tích hệ thống:** Sử dụng Antigravity để mô tả hệ thống dựa trên form yêu cầu của Gemini, đẩy mô tả qua Gemini để định hướng các bước kiểm thử bám sát vào giao diện và các tính năng chính của trang web.
 * **Giai đoạn sinh kịch bản (Gemini chủ đạo):** Yêu cầu Gemini trực tiếp xây dựng danh sách 15 Test Cases tập trung vào các thao tác thực tế của người dùng:
-  * Thao tác trên bản đồ (click chọn quốc gia hoặc thành phố để kiểm tra danh sách bài báo hiển thị tương ứng).
+  * Các thao tác giao diện và thao tác trên bản đồ (click chọn quốc gia hoặc thành phố để kiểm tra danh sách bài báo hiển thị tương ứng).
   * Chức năng chat hỏi đáp và kiểm thử phản hồi của AI.
   * Chức năng tạo ảnh minh họa.
   * Chức năng tạo và tải xuống các loại báo cáo (PDF, Excel, PowerPoint).
@@ -22,4 +23,4 @@ Tài liệu này ghi chép lại toàn bộ quá trình sử dụng các công c
 
 ## 4. Kế hoạch cải thiện 
 * Thực hiện kiểm thử thủ công các kịch bản đã được Gemini gợi ý và ChatGPT đánh giá trực tiếp trên ứng dụng.
-* Ghi nhận lại kết quả thực tế vào ma trận Test Cases và tổng hợp các lỗi phát sinh vào Bug Report Log.
+* Ghi nhận lại kết quả thực tế vào Test Cases và tổng hợp, trình bày các lỗi phát sinh vào Bug Reports.
