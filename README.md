@@ -1,27 +1,37 @@
-# Báo cáo Kiểm thử Phần mềm AI: Hệ thống CMapCheck Global Pulse
+# Báo cáo Kiểm thử Phần mềm: Hệ thống CMapCheck Global Pulse
 
-Repository này chứa mục tiêu kiểm thử, báo cáo lỗi và mã nguồn dự án **CMapCheck Global Pulse**, tập trung vào việc đánh giá năng lực của tính năng Chatbot hỏi đáp thông minh kết hợp cơ chế RAG (Retrieval-Augmented Generation) dựa trên dữ liệu cào tự động từ các nguồn báo chí chính thống.
+Repository này chứa tài liệu kiểm thử, báo cáo lỗi và phân tích kỹ thuật dự án **CMapCheck Global Pulse** phục vụ cho bài test vị trí Software Tester / QA. Tài liệu tập trung đánh giá chất lượng hệ thống, chiến lược kiểm thử luồng dữ liệu tự động (Data Pipeline), cơ chế RAG (Retrieval-Augmented Generation) và tính năng xuất báo cáo đa định dạng.
 
 ---
 
-## 1. Tổng quan dự án & Lý do lựa chọn
-* **Mô tả dự án:** Ứng dụng web toàn diện theo dõi tin tức biến động toàn cầu, tích hợp tự động cào tin tức từ RSS feeds của các báo lớn (VnExpress, Tuổi Trẻ, Thanh Niên, Nhân Dân) bám theo 13 quốc gia trọng điểm khi khởi động dự án. Cung cấp tính năng Chatbot (sử dụng Google Gemini AI `gemini-2.5-flash`) kết hợp RAG để người dùng tra cứu thông tin sự kiện, bên cạnh các tính năng nâng cao như tạo ảnh, tóm tắt quốc gia và xuất báo cáo đa định dạng (PDF, Excel, PowerPoint).
-* **Lý do lựa chọn:** Đây là một bài toán thực tế điển hình về ứng dụng RAG và xử lý ngôn ngữ tự nhiên, phản ánh đúng các thách thức trong kiểm thử AI hiện đại (xác suất phản hồi, hiện tượng ảo thông tin, quản lý bối cảnh dữ liệu ngắn hạn 7 ngày).
-* **Phạm vi kiểm thử:** Tập trung vào chức năng Chatbot hỏi đáp, cơ chế tiếp nhận và lọc dữ liệu từ scraper, các API AI phụ trợ và tính năng xuất báo cáo.
+## 1. Tổng quan dự án & Mục tiêu kiểm thử
+* **Mô tả hệ thống dưới góc độ QA:** Ứng dụng web giám sát tích hợp bản đồ GIS (**Leaflet.js**), luồng cào dữ liệu tự động từ RSS feeds (`scraper.py`), kết nối PostgreSQL qua Docker và tích hợp tầng AI (**Google Gemini AI**). Hệ thống có độ phức tạp cao với kiến trúc đa tầng (Multi-tier), kết hợp giữa dữ liệu cấu trúc (SQL) và dữ liệu phi cấu trúc (LLM).
+* **Mục tiêu kiểm thử:** 
+  * Đánh giá tính chính xác và độ ổn định của luồng cào dữ liệu, cơ chế lọc tin (deduplication, auto-cleanup sau 7 ngày).
+  * Kiểm thử tính toàn vẹn và hành vi của mô hình AI khi áp dụng RAG (truy xuất context bài báo để chatbot trả lời).
+  * Kiểm tra khả năng xử lý ngoại lệ của các API RESTful, tính năng tạo ảnh và xuất báo cáo (PDF, Excel, PPTX).
+* **Phạm vi kiểm thử (Test Scope):**
+  * **Module Scraper & Data Pipeline:** Kiểm thử cơ chế cào đa luồng (`ThreadPoolExecutor`), bộ lọc từ khóa (`TRIVIAL_KEYWORDS` vs `HIGH_IMPACT_KEYWORDS`), và xử lý dữ liệu trùng lặp.
+  * **Module RAG & AI Chatbot (`/api/chat`):** Kiểm thử khả năng nạp context, hiện tượng ảo giác (hallucination) khi thiếu dữ liệu, và cơ chế fallback khi mất kết nối API.
+  * **Module GIS & RESTful APIs:** Kiểm thử các endpoint trả dữ liệu điểm rủi ro (`/api/risk-scores`), dữ liệu bản đồ và cache.
+  * **Module Report Export & Content Generation:** Kiểm thử tính toàn vẹn của file xuất (`.pdf`, `.xlsx`, `.pptx`) và API sinh ảnh (`Pollinations.ai`).
 
-## 2. Kiến trúc & Giải pháp
-* **Luồng dữ liệu & Lưu trữ:** Hệ thống sử dụng Flask backend kết hợp PostgreSQL 15 chạy trong Docker container. Tiến trình `scraper.py` tự động cào tin tức từ RSS feeds, lọc phân chia theo từ khóa của 13 quốc gia, đồng thời có cơ chế tự động dọn dẹp tin cũ quá 7 ngày và loại bỏ tin trùng lặp.
-* **Đặc thù kỹ thuật & Chatbot (RAG):** Chatbot sử dụng mô hình Google Gemini (`gemini-2.5-flash`) với cơ chế RAG (lấy dữ liệu tin tức 7 ngày qua từ database làm bối cảnh). Phạm vi hỏi đáp khá rộng, không bị gò bó hoàn toàn trong các biến động toàn cầu và câu trả lời không bắt buộc phải phụ thuộc cứng nhắc vào dữ liệu cào về. Tuy nhiên, hệ thống vẫn tồn tại giới hạn về phạm vi kiến thức tổng quát và tốc độ phản hồi không quá nhanh.
+## 2. Phân tích Rủi ro & Kiến trúc từ góc nhìn QA
+* **Đặc thù dữ liệu & Rủi ro tích hợp:**
+  * *Non-deterministic Behavior (Tính bất định của AI):* Phản hồi từ Gemini AI không cố định, dễ dẫn đến lệch định dạng JSON cấu trúc điểm số rủi ro hoặc sinh thông tin sai lệch (hallucination) khi quốc gia được hỏi không có bài báo nào trong 7 ngày gần nhất.
+  * *Dependency Risk (Phụ thuộc bên thứ ba):* Luồng cào dữ liệu phụ thuộc hoàn toàn vào cấu trúc RSS của các báo lớn; thay đổi HTML/RSS hoặc chặn bot (Cloudflare) sẽ làm gián đoạn pipeline.
+  * *Performance & Latency:* Các tác vụ đồng bộ (gọi LLM kết hợp render ReportLab PDF hoặc gọi API sinh ảnh) gây độ trễ lớn (3–8 giây), tiềm ẩn nguy cơ timeout hoặc chạm trần Rate Limit (HTTP 429) của API miễn phí.
 
-## 3. Quy trình sử dụng AI (AI Workflow)
-* **Công cụ hỗ trợ:** Sử dụng các trợ lý AI (ChatGPT / Gemini) trong suốt quá trình phân tích hệ thống, xác định rủi ro đặc thù của mô hình RAG và sinh danh sách kịch bản kiểm thử, test cases cụ thể cùng các bug reports.
-* **Chi tiết quy trình:** Xem chi tiết tại tệp [AI_WORKLOG.md](./AI_WORKLOG.md).
+## 3. Chiến lược kiểm thử & Phương pháp thực hiện
+* **Kỹ thuật thiết kế Test Case:** Áp dụng phương pháp phân vùng tương đương (Equivalence Partitioning) và giá trị biên (Boundary Value Analysis) cho các bộ lọc ngày, bộ lọc từ khóa và phân tích điểm số rủi ro từ 0 đến 100.
+* **Quy trình Quản lý lỗi (Bug Lifecycle):** Phân loại lỗi theo mức độ nghiêm trọng (Blocker, Critical, Major, Minor) với các tiêu chí rõ ràng về hành vi tái hiện, log lỗi từ Docker container và phản hồi HTTP Status Code.
+* **Công cụ hỗ trợ:** Sử dụng giao diện web trực quan, kiểm thử thủ công trực tiếp trên trình duyệt, kết hợp với các thao tác cơ bản trên DBeaver để kiểm tra dữ liệu dưới database và sự hỗ trợ của AI để gợi ý kịch bản test.
 
-## 4. Các giới hạn thực tế của dự án
-* **Đặc thù bộ lọc dữ liệu:** Hệ thống tập trung chọn lọc các bài báo mang tính nghiêm trọng hoặc đặc biệt quan trọng và loại bỏ tin rác/trùng lặp, dẫn đến việc cơ sở dữ liệu sẽ thiếu hụt thông tin khi người dùng tra cứu về các sự kiện nhỏ, ngách hoặc đời thường. Nguồn dữ liệu cũng bị giới hạn trong phạm vi 13 quốc gia và chu kỳ lưu trữ 7 ngày gần nhất.
-* **Năng lực mô hình & Tốc độ:** Do sử dụng API Gemini với cơ chế hỏi đáp mở và không bắt buộc bám sát 100% dữ liệu cào, mô hình có xu hướng gặp hiện tượng ảo thông tin (tự bịa thông tin) khi đối mặt với các câu hỏi phức tạp vượt quá tầm kiểm soát. Thêm vào đó, tốc độ phản hồi của hệ thống không quá nhanh, ảnh hưởng phần nào đến trải nghiệm người dùng thời gian thực.
+## 4. Các giới hạn thực tế ghi nhận qua quá trình Test
+* **Giới hạn về dữ liệu:** Cơ chế tự động dọn rác giới hạn dữ liệu trong vòng 7 ngày, không hỗ trợ kiểm thử truy xuất dữ liệu lịch sử dài hạn (theo tháng/quý).
+* **Giới hạn về xử lý đồng bộ:** Chưa áp dụng hàng đợi (Queue) cho các tác vụ nặng như xuất file báo cáo hoặc gọi AI, dẫn đến hiện tượng nghẽn khi có nhiều request đồng thời.
 
-## 5. Tài liệu sản phẩm kiểm thử
-Toàn bộ danh sách kiểm thử chi tiết và báo cáo lỗi được đính kèm trong link:
-* **Chi tiết Test Cases:** Xem tại tệp/thư mục `docs/Test_Cases.pdf`
-* **Chi tiết Bug Reports:** Xem tại tệp/thư mục `docs/Bug_Reports.pdf`
+## 5. Tài liệu đính kèm
+* **Chi tiết Ma trận Test Cases:** Xem tại tệp [Test_Cases_Matrix.md](./docs/test_cases/Test_Cases_Matrix.md) (hoặc tệp PDF đính kèm qua Google Drive).
+* **Chi tiết Báo cáo lỗi (Bug Reports):** Xem tại tệp [Bug_Report_Log.md](./docs/bug_reports/Bug_Report_Log.md) (hoặc tệp PDF đính kèm qua Google Drive).
+* **Nhật ký hoạt động AI:** Xem tại tệp [AI_WORKLOG.md](./AI_WORKLOG.md).
