@@ -31,6 +31,5 @@ Repository này chứa tài liệu kiểm thử, báo cáo lỗi và phân tích
 * **Xử lý đồng thời:** Vì các tác vụ như xuất file hoặc gọi AI được xử lý trực tiếp, hệ thống có thể phản hồi chậm hơn nếu có nhiều người cùng thao tác một lúc.
 
 ## 5. Tài liệu đính kèm
-* **Chi tiết Ma trận Test Cases:** Xem tại tệp [Test_Cases_Matrix.md](./docs/test_cases/Test_Cases_Matrix.md) (hoặc tệp PDF đính kèm qua Google Drive).
-* **Chi tiết Báo cáo lỗi (Bug Reports):** Xem tại tệp [Bug_Report_Log.md](./docs/bug_reports/Bug_Report_Log.md) (hoặc tệp PDF đính kèm qua Google Drive).
+* **Chi tiết Test Cases, Bug Reports:** Xem tại tệp (https://drive.google.com/drive/u/1/folders/1FgLtRL39DrlvXEIZ6-0N2ohrsoVKVP7l).
 * **Nhật ký hoạt động AI:** Xem tại tệp [AI_WORKLOG.md](./AI_WORKLOG.md).
