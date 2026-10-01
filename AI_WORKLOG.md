@@ -14,6 +14,8 @@ Tài liệu này ghi chép lại toàn bộ quá trình sử dụng các công c
   * Chức năng chat hỏi đáp và kiểm thử phản hồi của AI.
   * Chức năng tạo ảnh minh họa.
   * Chức năng tạo và tải xuống các loại báo cáo (PDF, Excel, PowerPoint).
+* **Giai đoạn đánh giá và tinh chỉnh (ChatGPT chủ đạo):** Đẩy nội dung Test Cases đã được Gemini tạo qua ChatGPT để đánh giá và tinh chỉnh cho phù hợp.
+* **Giai đoạn cuối (Gemini chủ đạo):** Cuối cùng, đẩy nội dung Test Cases đã tinh chỉnh về lại Gemini để đánh giá lần cuối và tiến hành test thực tế trên hệ thống.
 
 ## 3. Các kết quả đầu ra chưa chính xác của AI và cách khắc phục
 * **Vấn đề ban đầu:** Ở các lần gợi ý đầu tiên, AI thường đưa ra các thuật ngữ hoặc tình huống kiểm thử quá phức tạp, mang tính kỹ thuật cao, chưa sát với các thao tác trực quan của người dùng trên giao diện web.
